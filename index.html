@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Tablas Rápidas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Concepto: hoja de cuaderno cuadriculado. Tinta azul, lápiz naranja, botones tipo sticker con sombra dura. */
+:root{
+  --paper:#f1f6fc; --card:#ffffff; --grid:#dbe6f4; --ink:#1b2655; --ink-soft:#4a5784;
+  --line:#c5d3e8; --chip:#e3ecf8;
+  --accent:#ff7a1a; --accent-ink:#1b2655; --blue:#3556d6; --good:#12894f; --bad:#cf2f47;
+  --f-display:'Baloo 2','Trebuchet MS',system-ui,sans-serif;
+  --f-body:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#111936; --card:#1a2447; --grid:#1f2a52; --ink:#eef2ff; --ink-soft:#a8b3da;
+    --line:#33406b; --chip:#232f58;
+    --accent:#ffa24d; --accent-ink:#111936; --blue:#8fa6ff; --good:#4fd18b; --bad:#ff8294;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#111936; --card:#1a2447; --grid:#1f2a52; --ink:#eef2ff; --ink-soft:#a8b3da;
+  --line:#33406b; --chip:#232f58;
+  --accent:#ffa24d; --accent-ink:#111936; --blue:#8fa6ff; --good:#4fd18b; --bad:#ff8294;
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  background-color:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px;
+  color:var(--ink);
+  font:500 1.0625rem/1.5 var(--f-body);
+  padding-block:20px 56px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+.wrap{max-width:760px;margin-inline:auto;display:grid;gap:16px}
+section{display:grid;gap:16px;min-width:0}
+button{font-family:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+
+h1{margin:0;font:800 clamp(2.1rem,8vw,3rem)/1 var(--f-display);text-wrap:balance}
+.hl{background:linear-gradient(transparent 60%,var(--accent) 60% 92%,transparent 92%);padding-inline:.1em}
+.sub{margin:8px 0 0;color:var(--ink-soft);font-weight:700}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.head>div:first-child{min-width:0}
+.zoom{display:flex;gap:8px;flex:none}
+.zoom .btn{min-width:48px;padding:8px 10px}
+
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding-bottom:4px}
+.tab{
+  font:800 clamp(.88rem,3.6vw,1.05rem) var(--f-display);color:var(--ink);background:var(--card);
+  border:2px solid var(--ink);border-radius:12px;padding:10px 2px;
+  box-shadow:3px 3px 0 var(--ink);cursor:pointer;touch-action:manipulation;
+}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+.tab:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+
+.panel{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:16px;display:grid;gap:14px;min-width:0}
+.h{font:800 1.25rem/1.2 var(--f-display);margin:0;text-wrap:balance}
+.eyebrow{font:800 .75rem var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin:0}
+.lead{margin:0;font-weight:700}
+.note{margin:0;color:var(--ink-soft);font-weight:700}
+.note.warn{color:var(--bad)}
+.center{text-align:center;justify-items:center}
+
+.chips{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+@media (min-width:560px){.chips{grid-template-columns:repeat(12,1fr)}}
+.chip{
+  display:grid;gap:4px;justify-items:center;padding:8px 2px 7px;
+  background:var(--chip);color:var(--ink);border:2px solid transparent;border-radius:10px;
+  cursor:pointer;min-width:0;touch-action:manipulation;
+}
+.chip-n{font:800 1.35rem/1 var(--f-display);font-variant-numeric:tabular-nums}
+.chip-bar{display:block;width:70%;height:5px;border-radius:3px;background:var(--line);overflow:hidden}
+.chip-bar i{display:block;height:100%;background:var(--good)}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--ink)}
+.chip[aria-pressed="true"] .chip-bar{background:rgba(0,0,0,.18)}
+.chip[aria-pressed="true"] .chip-bar i{background:var(--accent-ink)}
+
+.btn{
+  font:800 .95rem var(--f-body);color:var(--ink);background:var(--card);
+  border:2px solid var(--ink);border-radius:10px;padding:8px 14px;cursor:pointer;
+  box-shadow:2px 2px 0 var(--ink);touch-action:manipulation;
+}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--card)}
+.btn:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--ink)}
+.go{
+  font:800 1.35rem var(--f-display);background:var(--accent);color:var(--accent-ink);
+  border:2px solid var(--ink);border-radius:14px;padding:12px 16px;width:100%;
+  box-shadow:4px 4px 0 var(--ink);cursor:pointer;touch-action:manipulation;
+}
+.go:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink)}
+.go[disabled]{opacity:.45;cursor:not-allowed}
+.link{background:none;border:0;padding:4px 2px;color:var(--blue);font-weight:800;text-decoration:underline;cursor:pointer}
+.mini{display:flex;gap:16px}
+.btns{display:flex;flex-wrap:wrap;gap:10px}
+.actions{display:grid;gap:10px;width:100%}
+
+.hero{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.bignum{
+  display:grid;justify-items:center;gap:0;min-width:104px;padding:8px 18px 4px;
+  background:var(--accent);color:var(--accent-ink);border:2px solid var(--ink);border-radius:14px;
+  box-shadow:4px 4px 0 var(--ink);
+}
+.bignum .eyebrow{color:var(--accent-ink)}
+.bignum b{font:800 clamp(4rem,20vw,6rem)/.95 var(--f-display);font-variant-numeric:tabular-nums}
+.hero-side{display:grid;gap:10px;flex:1 1 220px;min-width:0}
+.meter{height:10px;border-radius:5px;background:var(--chip);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--accent)}
+.meter.small i{background:var(--good)}
+.trick{margin:0;background:var(--chip);border-radius:12px;padding:12px 14px}
+.skip{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.skip .lbl{font-weight:800;color:var(--ink-soft);margin-right:4px}
+.sk{background:var(--chip);border-radius:8px;padding:1px 9px;font:800 1.05rem var(--f-display);font-variant-numeric:tabular-nums}
+
+.visual{justify-items:center;text-align:center;gap:10px}
+.vcap{margin:0;font:800 1.1rem var(--f-display)}
+.dots{display:grid;gap:5px;margin-inline:auto}
+.dot{display:block;aspect-ratio:1;border-radius:50%}
+.dot.a{background:var(--accent)}
+.dot.b{background:var(--blue)}
+.vsum{margin:0;font:800 2rem/1.1 var(--f-display);font-variant-numeric:tabular-nums}
+.vsum strong{color:var(--blue)}
+.vnote{margin:0;color:var(--ink-soft);font-weight:700}
+
+.rows{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.row{
+  display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 14px;
+  background:var(--chip);color:var(--ink);border:2px solid transparent;border-radius:10px;
+  font:800 1.25rem var(--f-display);text-align:left;cursor:pointer;font-variant-numeric:tabular-nums;
+  touch-action:manipulation;
+}
+.row[aria-pressed="true"]{border-color:var(--ink);background:var(--card);box-shadow:3px 3px 0 var(--ink)}
+.ans{color:var(--blue)}
+.ans.hidden{color:var(--ink-soft)}
+
+.status{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:800;color:var(--ink-soft)}
+.q{margin:0;text-align:center;font:800 clamp(3rem,16vw,5rem)/1 var(--f-display);font-variant-numeric:tabular-nums}
+.ansbox{
+  min-height:4.4rem;display:grid;place-items:center;font:800 3rem/1 var(--f-display);
+  font-variant-numeric:tabular-nums;border:3px dashed var(--line);border-radius:14px;
+  max-width:360px;width:100%;margin-inline:auto;
+}
+.ansbox .ph{color:var(--line)}
+.ansbox.good{border:3px solid var(--good);color:var(--good)}
+.ansbox.bad{border:3px solid var(--bad);color:var(--bad)}
+@media (prefers-reduced-motion:no-preference){
+  .ansbox.bad{animation:shake .35s}
+  .meter i{transition:width .15s linear}
+}
+@keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.msg{min-height:1.7em;margin:0;text-align:center;font-weight:800;font-size:1.1rem}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:360px;width:100%;margin-inline:auto}
+.key{
+  font:800 1.7rem var(--f-display);min-height:58px;background:var(--chip);color:var(--ink);
+  border:2px solid var(--ink);border-radius:12px;box-shadow:2px 2px 0 var(--ink);cursor:pointer;touch-action:manipulation;
+}
+.key:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--ink)}
+.key.fn{font:800 1rem var(--f-body)}
+.key.ok{background:var(--accent);color:var(--accent-ink)}
+#next{max-width:360px;margin-inline:auto}
+
+.stars{margin:0;font-size:2.6rem;line-height:1;letter-spacing:.12em;color:var(--accent)}
+.stars .off{color:var(--line)}
+.score{margin:0;font:800 clamp(3.2rem,15vw,4.8rem)/1 var(--f-display);font-variant-numeric:tabular-nums}
+.score span{font-size:.4em;color:var(--ink-soft)}
+.miss{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.miss span{background:var(--chip);border-radius:8px;padding:5px 11px;font:800 1.05rem var(--f-display);font-variant-numeric:tabular-nums}
+
+/* Tablet: todo más grande, con teclado y pregunta bien visibles */
+@media (min-width:768px){
+  html{font-size:125%}
+  .wrap{max-width:1000px;gap:22px}
+  section{gap:22px}
+  .panel{padding:26px;gap:18px}
+  .tab{padding:14px 4px}
+  .chip{padding:12px 2px 10px}
+  .row{padding:14px 18px}
+  .q{font-size:6.5rem}
+  .ansbox{min-height:5.4rem;font-size:3.6rem}
+  .pad,.ansbox,#next{max-width:540px}
+  .pad{gap:14px}
+  .key{min-height:78px}
+  .dots{gap:7px}
+}
+@media (min-width:1100px){
+  html{font-size:140%}
+  .wrap{max-width:1180px}
+  .key{min-height:84px}
+}
+
+/* Base para uso fuera de Claude */
+body{margin:0}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="head">
+    <div>
+      <h1><span class="hl">Tablas Rápidas</span></h1>
+      <p class="sub">Mira, escucha y practica. Unos minutos cada día bastan.</p>
+    </div>
+    <div class="zoom" role="group" aria-label="Tamaño de la letra">
+      <button class="btn" type="button" data-act="zoom-out" aria-label="Letra más pequeña">A−</button>
+      <button class="btn" type="button" data-act="zoom-in" aria-label="Letra más grande">A+</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Secciones">
+    <button class="tab" type="button" role="tab" id="tab-learn" data-view="learn" aria-selected="true" aria-controls="view-learn">Aprender</button>
+    <button class="tab" type="button" role="tab" id="tab-practice" data-view="practice" aria-selected="false" aria-controls="view-practice">Practicar</button>
+    <button class="tab" type="button" role="tab" id="tab-quiz" data-view="quiz" aria-selected="false" aria-controls="view-quiz">Quiz</button>
+    <button class="tab" type="button" role="tab" id="tab-sprint" data-view="sprint" aria-selected="false" aria-controls="view-sprint">Reto</button>
+  </nav>
+
+  <section id="view-learn" role="tabpanel" aria-labelledby="tab-learn"></section>
+  <section id="view-practice" data-mode="practice" role="tabpanel" aria-labelledby="tab-practice" hidden></section>
+  <section id="view-quiz" data-mode="quiz" role="tabpanel" aria-labelledby="tab-quiz" hidden></section>
+  <section id="view-sprint" data-mode="sprint" role="tabpanel" aria-labelledby="tab-sprint" hidden></section>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+const $=(s,r)=>(r||document).querySelector(s);
+const $$=(s,r)=>Array.from((r||document).querySelectorAll(s));
+const store={
+  get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+};
+
+/* ---------- estado ---------- */
+let facts=store.get('tablas-datos',{});
+if(!facts||typeof facts!=='object')facts={};
+let best=Number(store.get('tablas-mejor',0))||0;
+const prefs=store.get('tablas-prefs',{})||{};
+let picked=new Set((Array.isArray(prefs.picked)?prefs.picked:[2,3,4]).filter(n=>Number.isInteger(n)&&n>=1&&n<=12));
+if(!picked.size&&!Array.isArray(prefs.picked))picked=new Set([2,3,4]);
+let learnT=(Number.isInteger(prefs.learnT)&&prefs.learnT>=1&&prefs.learnT<=12)?prefs.learnT:7;
+let quizT=(Number.isInteger(prefs.quizT)&&prefs.quizT>=1&&prefs.quizT<=12)?prefs.quizT:7;
+let learnM=4,cover=false,speaking=false,speakToken=0;
+let zoom=Number(store.get('tablas-zoom',0))||0;
+function applyZoom(){
+  const r=document.documentElement;
+  if(zoom>=80&&zoom<=240)r.style.fontSize=zoom+'%';else r.style.removeProperty('font-size');
+}
+function changeZoom(step){
+  const cur=zoom||Math.round(parseFloat(getComputedStyle(document.documentElement).fontSize)/16*100);
+  zoom=Math.max(80,Math.min(240,Math.round(cur+step)));
+  store.set('tablas-zoom',zoom);
+  applyZoom();
+}
+const revealed=new Set();
+const ui={practice:{phase:'setup'},quiz:{phase:'setup'},sprint:{phase:'setup'}};
+let game=null;
+
+const PRAISE=['¡Bien!','¡Correcto!','¡Eso es!','¡Muy bien!','¡Perfecto!','¡Sigue así!'];
+const TRICKS={
+  1:'Cualquier número por 1 se queda igual. 1 × 8 = 8.',
+  2:'Es el doble. Suma el número dos veces: 7 × 2 = 7 + 7 = 14.',
+  3:'Es el doble más una vez más. En 3 × 6, el doble de 6 es 12 y 12 + 6 = 18.',
+  4:'Es el doble del doble. En 4 × 7, el doble de 7 es 14 y el doble de 14 es 28.',
+  5:'Siempre termina en 0 o en 5. Cuenta de 5 en 5 con los dedos de la mano.',
+  6:'Piensa en la tabla del 5 y suma una vez más. 6 × 7 = 5 × 7 + 7 = 35 + 7 = 42.',
+  7:'Aprende 7 × 7 = 49 y la frase 5, 6, 7, 8: 56 = 7 × 8.',
+  8:'Dobla tres veces. En 8 × 4 dices: 4, 8, 16, 32.',
+  9:'Las cifras del resultado suman 9. En 9 × 4 = 36, las decenas son 4 − 1 = 3, y 3 + 6 = 9.',
+  10:'Pon un cero al final del número. 10 × 7 = 70.',
+  11:'Del 1 al 9 solo repites la cifra: 11 × 4 = 44. Después: 110, 121 y 132.',
+  12:'Es la tabla del 10 más la tabla del 2. 12 × 4 = 40 + 8 = 48.'
+};
+
+/* ---------- utilidades ---------- */
+const pairKey=(a,b)=>Math.min(a,b)+'x'+Math.max(a,b);
+const known=(a,b)=>{const f=facts[pairKey(a,b)];return !!f&&f.ok>=2&&f.last===1;};
+function record(a,b,ok){
+  const k=pairKey(a,b);
+  const f=facts[k]||{ok:0,bad:0,last:0};
+  if(ok){f.ok++;f.last=1;}else{f.bad++;f.last=0;}
+  facts[k]=f;
+  store.set('tablas-datos',facts);
+}
+function tableKnown(t){let n=0;for(let m=1;m<=12;m++)if(known(t,m))n++;return n;}
+function savePrefs(){store.set('tablas-prefs',{picked:[...picked],learnT,quizT});}
+function shuffle(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+const reduceMotion=()=>window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const U=['cero','uno','dos','tres','cuatro','cinco','seis','siete','ocho','nueve','diez','once','doce','trece','catorce','quince','dieciséis','diecisiete','dieciocho','diecinueve','veinte','veintiuno','veintidós','veintitrés','veinticuatro','veinticinco','veintiséis','veintisiete','veintiocho','veintinueve'];
+const TENS=['','','','treinta','cuarenta','cincuenta','sesenta','setenta','ochenta','noventa'];
+function words(n){
+  if(n<30)return U[n];
+  if(n<100){const t=Math.floor(n/10),u=n%10;return TENS[t]+(u?' y '+U[u]:'');}
+  if(n===100)return 'cien';
+  return 'ciento '+words(n-100);
+}
+
+function keepFocus(fn){
+  const a=document.activeElement;
+  let sel=null;
+  if(a&&a.dataset&&Object.keys(a.dataset).length&&a!==document.body){
+    sel=a.tagName.toLowerCase()+Object.entries(a.dataset).map(([k,v])=>'[data-'+k.replace(/[A-Z]/g,c=>'-'+c.toLowerCase())+'="'+v+'"]').join('');
+  }
+  fn();
+  if(sel){const n=$(sel);if(n)n.focus({preventScroll:true});}
+}
+
+/* ---------- selector de tablas ---------- */
+function chipsHTML(kind){
+  return Array.from({length:12},(_,i)=>{
+    const t=i+1;
+    const on=kind==='learn'?t===learnT:kind==='quiz'?t===quizT:picked.has(t);
+    const k=tableKnown(t);
+    return '<button type="button" class="chip" data-kind="'+kind+'" data-t="'+t+'" aria-pressed="'+on+'" aria-label="Tabla del '+t+', '+k+' de 12 aprendidas">'
+      +'<span class="chip-n">'+t+'</span><span class="chip-bar" aria-hidden="true"><i style="width:'+(k/12*100)+'%"></i></span></button>';
+  }).join('');
+}
+function syncPick(){
+  $$('.chip[data-kind="pick"]').forEach(c=>c.setAttribute('aria-pressed',String(picked.has(+c.dataset.t))));
+  $$('#view-practice [data-act="start"],#view-sprint [data-act="start"]').forEach(b=>{b.disabled=!picked.size;});
+  $$('.pickwarn').forEach(p=>{p.hidden=picked.size>0;});
+}
+
+/* ---------- Aprender ---------- */
+const canSpeak=('speechSynthesis' in window)&&('SpeechSynthesisUtterance' in window);
+function stopSpeak(){
+  speakToken++;
+  if(canSpeak){try{window.speechSynthesis.cancel();}catch(e){}}
+  speaking=false;
+}
+function speakTable(){
+  if(speaking){stopSpeak();renderLearn();return;}
+  const token=++speakToken;
+  const t=learnT;
+  try{
+    window.speechSynthesis.cancel();
+    speaking=true;
+    let last=null;
+    for(let m=1;m<=12;m++){
+      const u=new SpeechSynthesisUtterance(words(t)+' por '+words(m)+', '+words(t*m));
+      u.lang='es-MX';u.rate=.85;
+      u.onstart=()=>{if(token!==speakToken)return;learnM=m;revealed.add(t+'x'+m);renderLearn();};
+      window.speechSynthesis.speak(u);
+      last=u;
+    }
+    const done=()=>{if(token!==speakToken)return;speaking=false;renderLearn();};
+    last.onend=done;last.onerror=done;
+  }catch(e){speaking=false;}
+  renderLearn();
+}
+
+function renderLearn(){
+  keepFocus(()=>{
+    const t=learnT,m=learnM,k=tableKnown(t);
+    const show=mm=>!cover||revealed.has(t+'x'+mm);
+    const rows=Array.from({length:12},(_,i)=>{
+      const mm=i+1,vis=show(mm);
+      return '<button type="button" class="row" data-m="'+mm+'" aria-pressed="'+(mm===m)+'"><span>'+t+' × '+mm+' =</span><span class="ans'+(vis?'':' hidden')+'">'+(vis?t*mm:'?')+'</span></button>';
+    }).join('');
+    const skip=Array.from({length:12},(_,i)=>'<span class="sk">'+t*(i+1)+'</span>').join('');
+    const dots=Array.from({length:t*m},(_,i)=>'<i class="dot '+(Math.floor(i/t)%2?'b':'a')+'"></i>').join('');
+    const vis=show(m);
+    const cap=(m===1?'1 fila':m+' filas')+' de '+t+' '+(t===1?'punto':'puntos');
+    $('#view-learn').innerHTML=
+      '<div class="panel"><h2 class="h">Elige una tabla</h2><div class="chips" role="group" aria-label="Tablas del 1 al 12">'+chipsHTML('learn')+'</div></div>'
+      +'<div class="panel">'
+        +'<div class="hero">'
+          +'<div class="bignum"><span class="eyebrow">Tabla del</span><b>'+t+'</b></div>'
+          +'<div class="hero-side">'
+            +'<p class="lead">Ya sabes <strong>'+k+' de 12</strong> de esta tabla. Se llenan cuando practicas.</p>'
+            +'<div class="meter small" aria-hidden="true"><i style="width:'+(k/12*100)+'%"></i></div>'
+            +'<div class="btns">'
+              +(canSpeak?'<button class="btn" type="button" data-act="speak" aria-pressed="'+speaking+'">'+(speaking?'Detener':'Escuchar la tabla')+'</button>':'')
+              +'<button class="btn" type="button" data-act="cover" aria-pressed="'+cover+'">Tapar respuestas</button>'
+            +'</div>'
+          +'</div>'
+        +'</div>'
+        +'<p class="trick"><strong>Truco:</strong> '+TRICKS[t]+'</p>'
+        +(cover?'':'<div class="skip"><span class="lbl">De '+t+' en '+t+':</span>'+skip+'</div>')
+      +'</div>'
+      +'<div class="panel visual">'
+        +'<p class="vcap">'+cap+'</p>'
+        +'<div class="dots" role="img" aria-label="'+cap+'" style="grid-template-columns:repeat('+t+',1fr);width:min(100%,'+(t*34)+'px)">'+dots+'</div>'
+        +'<p class="vsum">'+t+' × '+m+' = <strong>'+(vis?t*m:'?')+'</strong></p>'
+        +(m!==t?'<p class="vnote">'+m+' × '+t+' da el mismo resultado.</p>':'')
+      +'</div>'
+      +'<div class="panel"><h2 class="h">Toca una operación para verla</h2><div class="rows">'+rows+'</div></div>';
+  });
+}
+
+/* ---------- Practicar y Reto: pantallas ---------- */
+function renderSetup(mode){
+  if(mode==='quiz'){
+    $('#view-quiz').innerHTML=
+      '<div class="panel">'
+        +'<h2 class="h">Quiz de una sola tabla</h2>'
+        +'<div class="chips" role="group" aria-label="Elige la tabla del quiz">'+chipsHTML('quiz')+'</div>'
+        +'<p class="note">10 preguntas de la misma tabla. Si fallas una, esa operación vuelve a salir <strong>5 veces</strong> para que se te quede.</p>'
+        +'<button class="go" type="button" data-act="start">Empezar el quiz</button>'
+      +'</div>';
+    return;
+  }
+  const isP=mode==='practice';
+  $('#view-'+mode).innerHTML=
+    '<div class="panel">'
+      +'<h2 class="h">'+(isP?'¿Qué tablas quieres practicar?':'¿Con qué tablas quieres el reto?')+'</h2>'
+      +'<div class="chips" role="group" aria-label="Elige las tablas">'+chipsHTML('pick')+'</div>'
+      +'<div class="mini"><button class="link" type="button" data-act="all">Todas</button><button class="link" type="button" data-act="none">Ninguna</button></div>'
+      +'<p class="note warn pickwarn" '+(picked.size?'hidden':'')+'>Elige al menos una tabla.</p>'
+      +'<p class="note">'+(isP
+        ?'10 preguntas. Las que falles vuelven a salir enseguida para repasarlas.'
+        :'Responde las que puedas en 60 segundos. '+(best?'Tu mejor marca: <strong>'+best+'</strong>.':'Todavía no tienes marca.'))+'</p>'
+      +'<button class="go" type="button" data-act="start" '+(picked.size?'':'disabled')+'>'+(isP?'Empezar a practicar':'Empezar el reto')+'</button>'
+    +'</div>';
+}
+
+function renderPlay(){
+  const g=game,q=g.q,isP=g.mode!=='sprint';
+  const left=isP?(q.retry?(g.mode==='quiz'?'Repite '+q.rep+' de 5':'Para repasar'):'Pregunta '+g.asked+' de '+g.total):'Aciertos: '+g.score;
+  const right=isP?'<button class="link" type="button" data-act="quit">Salir</button>':'<span id="status-r">60 s</span>';
+  const keys=['1','2','3','4','5','6','7','8','9'].map(k=>'<button class="key" type="button" data-k="'+k+'">'+k+'</button>').join('');
+  $('#view-'+g.mode).innerHTML=
+    '<div class="panel">'
+      +'<div class="meter" aria-hidden="true"><i id="meter-i" style="width:'+(isP?progressNow():100)+'%"></i></div>'
+      +'<div class="status"><span id="status-l">'+left+'</span>'+right+'</div>'
+      +'<p class="q" aria-label="'+q.a+' por '+q.b+'">'+q.a+' × '+q.b+' =</p>'
+      +'<div class="ansbox" id="ansbox" aria-live="polite"><span class="ph">?</span></div>'
+      +'<p class="msg" id="msg" aria-live="assertive"></p>'
+      +'<div class="pad">'+keys
+        +'<button class="key fn" type="button" data-k="del">Borrar</button>'
+        +'<button class="key" type="button" data-k="0">0</button>'
+        +'<button class="key fn ok" type="button" data-k="ok">Listo</button>'
+      +'</div>'
+      +'<button class="go" type="button" data-act="next" id="next" hidden>Siguiente</button>'
+      +(isP?'':'<div class="mini" style="justify-content:center"><button class="link" type="button" data-act="quit">Salir del reto</button></div>')
+    +'</div>';
+}
+function updateAns(){
+  const b=$('#ansbox');
+  if(b)b.innerHTML=game.typed?game.typed:'<span class="ph">?</span>';
+}
+function progressNow(){
+  if(!game)return 0;
+  if(game.mode==='quiz')return game.answered/Math.max(1,game.answered+game.queue.length+(game.locked?0:1))*100;
+  return game.done/Math.max(1,game.total)*100;
+}
+function updateMeter(){
+  const mi=$('#meter-i');
+  if(mi&&game&&game.mode!=='sprint')mi.style.width=progressNow()+'%';
+}
+
+/* ---------- juego ---------- */
+function clearTimers(){
+  if(game){clearTimeout(game.tm);clearInterval(game.iv);}
+}
+function buildPractice(tables){
+  const map=new Map();
+  tables.forEach(t=>{for(let m=1;m<=12;m++){const k=pairKey(t,m);if(!map.has(k))map.set(k,{t,m});}});
+  const sorted=[...map.values()].map(p=>({p,s:(known(p.t,p.m)?1:0)+Math.random()*.8})).sort((x,y)=>x.s-y.s).slice(0,10).map(x=>x.p);
+  return shuffle(sorted);
+}
+function buildQuiz(t){
+  const ms=Array.from({length:12},(_,i)=>i+1)
+    .map(m=>({m,s:(known(t,m)?1:0)+Math.random()*.8}))
+    .sort((x,y)=>x.s-y.s).slice(0,10).map(x=>x.m);
+  return shuffle(ms).map(m=>({t,m}));
+}
+function pickSprint(){
+  const pool=[];
+  game.tables.forEach(t=>{for(let m=1;m<=12;m++)pool.push({t,m});});
+  const unk=pool.filter(p=>!known(p.t,p.m));
+  const src=(unk.length&&Math.random()<.6)?unk:pool;
+  let p,tries=0;
+  do{p=src[Math.floor(Math.random()*src.length)];tries++;}
+  while(pairKey(p.t,p.m)===game.lastKey&&tries<10&&src.length>1);
+  game.lastKey=pairKey(p.t,p.m);
+  return p;
+}
+function toTop(){const t=$('.tabs');if(t)t.scrollIntoView({block:'start'});}
+
+function startGame(mode){
+  if(mode!=='quiz'&&!picked.size)return;
+  clearTimers();
+  const tables=mode==='quiz'?[quizT]:[...picked].sort((a,b)=>a-b);
+  game={mode,tables,typed:'',locked:false,awaitNext:false,q:null,score:0,done:0,asked:0,total:0,answered:0,
+        wrong:[],wrongSet:new Set(),queue:[],tm:null,iv:null,endAt:0,lastKey:''};
+  if(mode==='quiz'){game.queue=buildQuiz(quizT);game.total=game.queue.length;}
+  else if(mode==='practice'){game.queue=buildPractice(tables);game.total=game.queue.length;}
+  else{game.endAt=performance.now()+60000;}
+  ui[mode]={phase:'play'};
+  nextQuestion();
+  if(mode==='sprint')game.iv=setInterval(tick,100);
+  toTop();
+}
+function nextQuestion(){
+  if(!game)return;
+  let q;
+  if(game.mode!=='sprint'){
+    q=game.queue.shift();
+    if(!q){finish();return;}
+    if(!q.retry)game.asked++;
+  }else{q=pickSprint();}
+  const swap=Math.random()<.5;
+  game.q={a:swap?q.m:q.t,b:swap?q.t:q.m,t:q.t,m:q.m,retry:!!q.retry,rep:q.rep||0};
+  game.typed='';game.locked=false;game.awaitNext=false;
+  renderPlay();
+  if(game.mode==='sprint')tick();
+}
+function tick(){
+  if(!game||game.mode!=='sprint')return;
+  const rem=game.endAt-performance.now();
+  if(rem<=0){finish();return;}
+  const m=$('#meter-i'),r=$('#status-r');
+  if(m)m.style.width=(rem/60000*100)+'%';
+  if(r)r.textContent=Math.ceil(rem/1000)+' s';
+}
+function press(k){
+  if(!game||game.locked)return;
+  if(k==='ok'){submit();return;}
+  if(k==='del')game.typed=game.typed.slice(0,-1);
+  else if(game.typed.length<3)game.typed+=k;
+  updateAns();
+  if(k!=='del'&&game.typed.length>=String(game.q.a*game.q.b).length)submit();
+}
+function submit(){
+  if(!game||game.locked||game.typed==='')return;
+  const q=game.q,correct=q.a*q.b,ok=parseInt(game.typed,10)===correct,isP=game.mode!=='sprint';
+  game.locked=true;
+  const box=$('#ansbox'),msg=$('#msg');
+  if(box)box.classList.add(ok?'good':'bad');
+  if(!isP||!q.retry)record(q.t,q.m,ok);
+  if(isP){
+    if(!q.retry)game.done++;
+    game.answered++;
+  }
+  if(ok){
+    if(!isP||!q.retry)game.score++;
+    if(msg)msg.textContent=PRAISE[Math.floor(Math.random()*PRAISE.length)];
+    const sl=$('#status-l');if(!isP&&sl)sl.textContent='Aciertos: '+game.score;
+    game.tm=setTimeout(nextQuestion,isP?800:350);
+  }else{
+    const key=pairKey(q.t,q.m);
+    if(!game.wrongSet.has(key)){game.wrongSet.add(key);game.wrong.push({t:q.t,m:q.m,text:q.a+' × '+q.b+' = '+correct});}
+    if(msg)msg.textContent='Casi. '+q.a+' × '+q.b+' = '+correct;
+    if(isP){
+      if(game.mode==='quiz'){
+        if(!q.retry){
+          for(let i=1;i<=5;i++)game.queue.splice(Math.min(i*2-1,game.queue.length),0,{t:q.t,m:q.m,retry:true,rep:i});
+        }
+      }else{
+        game.queue.splice(Math.min(2,game.queue.length),0,{t:q.t,m:q.m,retry:true});
+      }
+      game.awaitNext=true;
+      const nx=$('#next');if(nx){nx.hidden=false;}
+    }else{
+      game.tm=setTimeout(nextQuestion,1300);
+    }
+  }
+  updateMeter();
+}
+function finish(){
+  if(!game)return;
+  const g=game;
+  clearTimers();
+  game=null;
+  g.prevBest=best;
+  g.isRecord=g.mode==='sprint'&&g.score>0&&g.score>best;
+  if(g.isRecord){best=g.score;store.set('tablas-mejor',best);}
+  ui[g.mode]={phase:'done',res:g};
+  renderDone(g);
+  toTop();
+}
+function renderDone(g){
+  const missHTML=g.wrong.length
+    ?'<div><p class="eyebrow">Para repasar</p><div class="miss">'+g.wrong.map(w=>'<span>'+w.text+'</span>').join('')+'</div></div>':'';
+  let head;
+  if(g.mode!=='sprint'){
+    const pct=Math.round(g.score/g.total*100);
+    const stars=pct>=90?3:pct>=60?2:1;
+    const title=pct===100?'¡Perfecto, ninguna fallada!':pct>=80?'¡Muy bien!':pct>=50?'Vas mejorando':'Sigue practicando, ya casi';
+    head='<p class="eyebrow">Resultado'+(g.mode==='quiz'?' · tabla del '+g.tables[0]:'')+'</p>'
+      +'<p class="stars" aria-label="'+stars+' de 3 estrellas">'+'★'.repeat(stars)+'<span class="off">'+'★'.repeat(3-stars)+'</span></p>'
+      +'<p class="score">'+g.score+'<span> de '+g.total+'</span></p>'
+      +'<p class="lead">'+title+'</p>';
+  }else{
+    head='<p class="eyebrow">Tiempo</p>'
+      +'<p class="score">'+g.score+'<span> aciertos</span></p>'
+      +'<p class="lead">'+(g.isRecord?'¡Nuevo récord!'+(g.prevBest?' Antes era '+g.prevBest+'.':''):(best?'Tu mejor marca es '+best+'.':'Inténtalo otra vez.'))+'</p>';
+  }
+  $('#view-'+g.mode).innerHTML=
+    '<div class="panel center">'+head+missHTML
+      +'<div class="actions">'
+        +'<button class="go" type="button" data-act="start">'+(g.mode!=='sprint'?'Otra ronda':'Otra vez')+'</button>'
+        +(g.wrong.length?'<button class="btn" type="button" data-act="review">Repasar la tabla del '+g.wrong[0].t+' en Aprender</button>':'')
+        +'<button class="btn" type="button" data-act="change">Cambiar tablas</button>'
+      +'</div>'
+    +'</div>';
+}
+
+/* ---------- navegación ---------- */
+let current='learn';
+function renderMode(mode){
+  const st=ui[mode];
+  if(st.phase==='done'&&st.res)renderDone(st.res);
+  else renderSetup(mode);
+}
+function switchView(name){
+  stopSpeak();
+  if(game){
+    clearTimers();
+    ui[game.mode]={phase:'setup'};
+    game=null;
+  }
+  current=name;
+  ['learn','practice','quiz','sprint'].forEach(v=>{
+    const on=v===name;
+    $('#tab-'+v).setAttribute('aria-selected',String(on));
+    $('#view-'+v).hidden=!on;
+  });
+  if(name==='learn')renderLearn();
+  else renderMode(name);
+}
+
+/* ---------- eventos ---------- */
+document.addEventListener('click',e=>{
+  const b=e.target.closest('button');
+  if(!b)return;
+  if(b.classList.contains('tab')){switchView(b.dataset.view);return;}
+
+  if(b.dataset.kind==='learn'){
+    stopSpeak();
+    learnT=+b.dataset.t;revealed.clear();savePrefs();renderLearn();return;
+  }
+  if(b.dataset.kind==='quiz'){
+    quizT=+b.dataset.t;savePrefs();
+    $$('.chip[data-kind="quiz"]').forEach(c=>c.setAttribute('aria-pressed',String(+c.dataset.t===quizT)));
+    return;
+  }
+  if(b.dataset.kind==='pick'){
+    const t=+b.dataset.t;
+    if(picked.has(t))picked.delete(t);else picked.add(t);
+    savePrefs();syncPick();return;
+  }
+  if(b.classList.contains('row')){
+    const m=+b.dataset.m;
+    if(speaking)stopSpeak();
+    learnM=m;
+    if(cover){const k=learnT+'x'+m;if(revealed.has(k))revealed.delete(k);else revealed.add(k);}
+    renderLearn();
+    const v=$('.visual');
+    if(v){
+      const r=v.getBoundingClientRect();
+      if(r.top<0||r.bottom>window.innerHeight)v.scrollIntoView({block:'center',behavior:reduceMotion()?'auto':'smooth'});
+    }
+    return;
+  }
+  if(b.dataset.k!==undefined){press(b.dataset.k);return;}
+
+  const act=b.dataset.act;
+  if(!act)return;
+  const sec=b.closest('section');
+  const mode=sec&&sec.dataset.mode;
+  switch(act){
+    case 'zoom-in':changeZoom(20);break;
+    case 'zoom-out':changeZoom(-20);break;
+    case 'speak':speakTable();break;
+    case 'cover':cover=!cover;revealed.clear();renderLearn();break;
+    case 'all':picked=new Set([1,2,3,4,5,6,7,8,9,10,11,12]);savePrefs();syncPick();break;
+    case 'none':picked=new Set();savePrefs();syncPick();break;
+    case 'start':if(mode)startGame(mode);break;
+    case 'next':if(game&&game.awaitNext)nextQuestion();break;
+    case 'quit':
+      if(game){clearTimers();ui[game.mode]={phase:'setup'};const md=game.mode;game=null;renderSetup(md);}
+      break;
+    case 'change':if(mode){ui[mode]={phase:'setup'};renderSetup(mode);}break;
+    case 'review':{
+      const res=mode&&ui[mode].res;
+      if(res&&res.wrong.length){learnT=res.wrong[0].t;learnM=res.wrong[0].m;revealed.clear();savePrefs();}
+      switchView('learn');toTop();
+      break;
+    }
+  }
+});
+
+document.addEventListener('keydown',e=>{
+  if(!game||e.ctrlKey||e.metaKey||e.altKey)return;
+  if(/^[0-9]$/.test(e.key)){press(e.key);e.preventDefault();}
+  else if(e.key==='Backspace'){press('del');e.preventDefault();}
+  else if(e.key==='Enter'){
+    if(game.awaitNext)nextQuestion();
+    else if(!game.locked)submit();
+    e.preventDefault();
+  }
+});
+
+window.addEventListener('pagehide',stopSpeak);
+
+/* ---------- inicio ---------- */
+applyZoom();
+renderLearn();
+renderSetup('practice');
+renderSetup('quiz');
+renderSetup('sprint');
+})();
+</script>
+
+</body>
+</html>
